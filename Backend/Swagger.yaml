@@ -8,6 +8,12 @@ info:
 servers:
   - url: http://localhost:8080/api
     description: Internal server for testing
+components:
+  securitySchemes:
+    cookieAuth:         
+      type: http
+      in: cookie
+      name: token
 paths:
   /auth/register:
     post:
@@ -113,3 +119,10 @@ paths:
                         type: number
                   token:
                     type: string
+  /auth/refresh:
+    get:
+      summary: refresh token.
+      tags:
+        - Auth
+      security:
+        - cookieAuth:: []

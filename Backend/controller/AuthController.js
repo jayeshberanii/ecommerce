@@ -1,3 +1,4 @@
+const JWT=require('jsonwebtoken')
 const User = require('../models/UserModel')
 const {generateAccessToken, generateRefreshToken} = require('../utils/GenerateToken')
 
@@ -38,11 +39,42 @@ const userLogin = async (req, res) => {
                 !isCompared && res.status(404).json({ msg: "Invalid Credentials!😥" })
                 if(isCompared){
                     const{password:pass,...rest}=user._doc
-                    const accessToken=await generateAccessToken(rest._id);
-                    const refreshToken=await generateRefreshToken(rest._id)
-                    res.cookie('token',refreshToken)
+                    const accessToken= generateAccessToken(rest._id);
+                    const refreshToken= generateRefreshToken(rest._id)
+                    await User.findByIdAndUpdate(rest._id,{
+                        refreshToken:refreshToken,
+                    },{
+                        new:true,
+                    })
+                    res.header('Authorization',accessToken)
+                    res.cookie('token',refreshToken,{ httpOnly:true, secure:false})
                     res.status(200).json({ msg: "User login successfully 🎉",user:rest,token:accessToken})
                 }                
+            }
+        }
+    } catch (error) {
+        res.status(500).json({ msg: error.message })
+    }
+}
+
+//Handle Refresh
+const handleRefresh=async(req,res,next)=>{
+    try {
+        const refreshToken=req.cookies.token
+        if(!refreshToken){
+            res.status(401).json({ msg: "token not found😥" })
+        }else{
+            const decoded=JWT.verify(refreshToken,process.env.SECRET_REFRESH_TOKEN)
+            const user=await User.findOne({refreshToken})
+            if(!user){
+                res.status(401).json({ msg: "token not found😥" })
+            }else{
+                if(user._id.toString()!==decoded.user.toString()){
+                    res.status(401).json({ msg: "Not Authorize😥" })
+                }else{
+                    const accessToken=generateAccessToken(user._id)
+                    res.json({accessToken:accessToken})
+                }
             }
         }
     } catch (error) {
@@ -53,4 +85,5 @@ const userLogin = async (req, res) => {
 module.exports = {
     userRegister,
     userLogin,
+    handleRefresh,
 }

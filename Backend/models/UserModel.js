@@ -15,6 +15,9 @@ password:{
     type:String,
     required:true
 },
+refreshToken:{
+    type: String
+},
 isAdmin:{
     type:Boolean,
     default:false

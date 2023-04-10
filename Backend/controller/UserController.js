@@ -57,7 +57,7 @@ const editUser=async(req,res)=>{
             if(!response){
                 res.status(404).json({msg:"User not found!"})
             }else{ 
-                res.status(200).json({msg:"user updated 🐥"})  
+                res.status(200).json({msg:"user updated 🐥"})
             }                   
         }else{
             res.status(401).json({msg:"Not authorize"})

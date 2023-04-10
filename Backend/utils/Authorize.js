@@ -27,6 +27,7 @@ const AdminAuthorize=async(req,res,next)=>{
     }    
 }
 
+
 module.exports={
     Authorize,
     AdminAuthorize
